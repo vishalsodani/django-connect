@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% load tz %}
+
+{% block title %}Me{% endblock %}
+
+{% block page_title %}Me{% endblock page_title %}
+
+{% block content %}
+<p>Username is {{ user.username }}</p>
+<p>Email is {{ user.email.email }}</p>
+<p>New Email is {{ user.new_email.email }}</p>
+<p>Phone is {{ user.phone.phone }}</p>
+<p>New Phone is {{ user.new_phone.phone }}</p>
+<br>
+<p>First name is {{ user.first_name }}</p>
+<p>Last name is {{ user.last_name }}</p>
+<p>Birthdate is {{ user.born_on }}</p>
+<p>Gender is {{ user.get_gender_display }}</p>
+<br>
+<p>Language is {{ user.get_language_display }}</p>
+<p>Timezone is {{ user.timezone }}</p>
+<br>
+<p>Seller: {{ user.is_seller }}</p>
+<br>
+<p>Super user: {{ user.is_superuser }}</p>
+<p>Staff: {{ user.is_staff }}</p>
+<p>Active: {{ user.is_active }}</p>
+<br>
+<p>Created on | Local time: {% localtime on %}{{ user.created_on }}{% endlocaltime %}</p>
+<p>Created on | UTC time: {% localtime off %}{{ user.created_on }}{% endlocaltime %}</p>
+{% endblock content %}
