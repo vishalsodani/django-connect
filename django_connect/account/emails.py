@@ -19,7 +19,7 @@ def verify_email(user):
     context = {
         'short_name': user.get_short_name(),
         'email': user.new_email.email,
-        'email_key': user.new_email.key,
+        'key': user.new_email.key,
         'site_url': settings.SITE_URL,
         'page_url': reverse('account:verify_email'),
     }

@@ -10,7 +10,6 @@ from django.contrib.auth import authenticate, login
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
 
-from auth import emails as auth_emails
 from account import emails as account_emails
 from users.choices import Genders
 from users.models import User, NewEmail
@@ -50,8 +49,6 @@ class CustomOAuthCallback(OAuthCallback):
 	        })
         # Create user
         user = User.objects.create_user(**kwargs)
-        # Email user to welcome
-        auth_emails.welcome(user)
         # Check for facebook email data
         if provider.name == 'facebook' and info.get('email'):
             # Create new email
