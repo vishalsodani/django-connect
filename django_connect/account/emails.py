@@ -26,7 +26,7 @@ def verify_email(user):
     send_mail(
         _('Verify your email'),
         message % context,
-        'no-reply@creco.co',
+        settings.EMAIL_HOST_USER,
         [user.new_email.email],
         fail_silently=False,
     )
