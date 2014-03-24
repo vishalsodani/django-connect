@@ -19,9 +19,9 @@ from users.models import User, NewEmail
 class CustomOAuthRedirect(OAuthRedirect):
 
     def get_additional_parameters(self, provider):
-        # if provider.name == 'facebook':
-        #     # Request permission to see user's email
-        #     return {'scope': 'email'}
+        if provider.name == 'facebook':
+            # Request permission to see user's email
+            return {'scope': 'email'}
         return super(CustomOAuthRedirect, self).get_additional_parameters(provider)
 
 
