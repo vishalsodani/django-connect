@@ -57,7 +57,7 @@ class CustomOAuthCallback(OAuthCallback):
             # Create new email
             new_email = NewEmail.objects.create_new_email(user, info['email'])
             # Email user to verify email
-            account_emails.verify_email()
+            account_emails.verify_email(user)
         return user
 
     def handle_existing_user(self, provider, user, access, info):
