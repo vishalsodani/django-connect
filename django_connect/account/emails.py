@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
+from django.utils.translation import ugettext_lazy as _
 
 from django_connect.decorators import async
 
