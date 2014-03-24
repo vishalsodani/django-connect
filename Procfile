@@ -1,0 +1,1 @@
+web: gunicorn --pythonpath django_connect django_connect.wsgi
