@@ -255,7 +255,7 @@ SOUTH_TESTS_MIGRATE = False
 ########## END SOUTH CONFIGURATION
 
 
-########## LANGUAGES CONFIGURATION
+########## TRANSLATION CONFIGURATION
 # https://docs.djangoproject.com/en/1.6/topics/i18n/translation/#how-django-discovers-language-preference
 from django.utils.translation import ugettext_lazy as _
 
@@ -263,7 +263,11 @@ LANGUAGES = (
     ('en', _('English')),
     ('tr', _('Turkish')),
 )
-########## END LANGUAGES CONFIGURATION
+
+LOCALE_PATHS = (
+    normpath(join(SITE_ROOT, 'django_connect/locale')),
+)
+########## END TRANSLATION CONFIGURATION
 
 
 ########## AUTH CONFIGURATION
