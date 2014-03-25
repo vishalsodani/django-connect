@@ -8,6 +8,6 @@ class SettingsForm(ModelForm):
     class Meta:
         model = User
         fields = [
-            'first_name', 'last_name', 'gender', 'born_on', 
+            'first_name', 'last_name', 'birthday', 'gender', 
             'language', 'timezone',
         ]

@@ -22,7 +22,7 @@ class UserManager(BaseUserManager):
         # Check for username
         if not username:
             raise ValueError('Username is a required field.')
-        if not self.is_unique_username(username):
+        if not User.is_unique_username(username):
             raise ValueError('Username must be unique.')
         # Get user model instance
         user = self.model(username=username, **extra_fields)
@@ -47,7 +47,7 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def get_user_by_username_email_or_phone(self, username_email_or_phone):
+    def get_by_username_email_or_phone(self, username_email_or_phone):
         try:
             return User.objects.filter(
                 Q(username__iexact=username_email_or_phone) | 
@@ -56,9 +56,6 @@ class UserManager(BaseUserManager):
             ).get()
         except User.DoesNotExist:
             return None
-
-    def is_unique_username(self, username):
-        return super(UserManager, self).filter(username__iexact=username).count() == 0
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -78,7 +75,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=NAME_MAX_LENGTH)
     last_name = models.CharField(max_length=NAME_MAX_LENGTH)
 
-    born_on = models.DateField(blank=True, null=True)
+    birthday = models.DateField(blank=True, null=True)
     gender = models.IntegerField(blank=True, null=True, choices=Genders.CHOICES)
 
     language = models.CharField(choices=settings.LANGUAGES, max_length=LANGUAGE_MAX_LENGTH)
@@ -103,15 +100,33 @@ class User(AbstractBaseUser, PermissionsMixin):
     def get_short_name(self):
         return self.first_name
 
+    @staticmethod
+    def is_unique_username(username):
+        return User.objects.filter(username__iexact=username).count() == 0
+
+    @staticmethod
+    def is_unique_email(email):
+        return Email.objects.filter(email__iexact=email).count() == 0 and NewEmail.objects.filter(email__iexact=email).count() == 0
+
+    @staticmethod
+    def is_unique_phone(phone):
+        return Phone.objects.filter(phone=phone).count() == 0 and NewPhone.objects.filter(phone=phone).count() == 0
+
+    @staticmethod
+    def prepare_birthday(birthday):
+        month, day, year = birthday.split('/')
+        return "{0}-{1}-{2}".format(year, month, day)
+
 
 class EmailManager(models.Manager):
-    def create_email(self, user, email):
+    def create_email(self, user, email, delete_new_email=True):
         # Get email model instance
         _email = self.model(user=user, email=UserManager.normalize_email(email))
         # Save email
         _email.save(using=self._db)
-        # Delete new email
-        NewEmail.objects.filter(email=email).delete()
+        if delete_new_email:
+            # Delete new email
+            NewEmail.objects.filter(email=email).delete()
         return _email
 
 
@@ -138,7 +153,7 @@ class NewEmailManager(models.Manager):
         new_email.key = NewEmail.generate_key(email)
         # Save new_email
         new_email.save(using=self._db)
-        return new_email  
+        return new_email
 
 
 class NewEmail(AbstractModel):
@@ -162,59 +177,60 @@ class NewEmail(AbstractModel):
         return tools.generate_key(length=NewEmail.KEY_MAX_LENGTH, extra=email)
 
 
-class PhoneManager(models.Manager):
-    def create_phone(self, user, phone):
-        # Get phone model instance
-        _phone = self.model(user=user, phone=phone)
-        # Save phone
-        _phone.save(using=self._db)
-        # Delete new phone
-        NewPhone.objects.filter(phone=phone).delete()
-        return _phone
+# class PhoneManager(models.Manager):
+#     def create_phone(self, user, phone, delete_new_phone=True):
+#         # Get phone model instance
+#         _phone = self.model(user=user, phone=phone)
+#         # Save phone
+#         _phone.save(using=self._db)
+#         if delete_new_phone:
+#             # Delete new phone
+#             NewPhone.objects.filter(phone=phone).delete()
+#         return _phone
 
 
-class Phone(AbstractModel):
-    PHONE_MAX_LENGTH = 20
+# class Phone(AbstractModel):
+#     PHONE_MAX_LENGTH = 20
 
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, related_name='phone')
-    phone = models.EmailField(max_length=PHONE_MAX_LENGTH, unique=True)
+#     user = models.OneToOneField(settings.AUTH_USER_MODEL, related_name='phone')
+#     phone = models.EmailField(max_length=PHONE_MAX_LENGTH, unique=True)
 
-    objects = PhoneManager()
+#     objects = PhoneManager()
 
-    def __unicode__(self):
-        return "%(user)s's phone is %(phone)s" % {
-            'user':self.user.get_full_name(), 
-            'phone': self.phone,
-        }
-
-
-class NewPhoneManager(models.Manager):
-    def create_new_phone(self, user, phone):
-        # Get new_phone model instance
-        new_phone = self.model(user=user, phone=phone)
-        # Set key
-        new_phone.key = NewPhone.generate_key()
-        # Save new_phone
-        new_phone.save(using=self._db)
-        return new_phone      
+#     def __unicode__(self):
+#         return "%(user)s's phone is %(phone)s" % {
+#             'user':self.user.get_full_name(), 
+#             'phone': self.phone,
+#         }
 
 
-class NewPhone(AbstractModel):
-    KEY_MAX_LENGTH = 8
+# class NewPhoneManager(models.Manager):
+#     def create_new_phone(self, user, phone):
+#         # Get new_phone model instance
+#         new_phone = self.model(user=user, phone=phone)
+#         # Set key
+#         new_phone.key = NewPhone.generate_key()
+#         # Save new_phone
+#         new_phone.save(using=self._db)
+#         return new_phone      
 
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, related_name='new_phone')
-    phone = models.CharField(max_length=Phone.PHONE_MAX_LENGTH, unique=True)
-    key = models.CharField(max_length=KEY_MAX_LENGTH)
 
-    objects = NewPhoneManager()
+# class NewPhone(AbstractModel):
+#     KEY_MAX_LENGTH = 8
 
-    def __unicode__(self):
-        return "%(user)s's new phone is %(phone)s with key %(key)s" % {
-            'user':self.user.get_full_name(), 
-            'phone': self.phone,
-            'key': self.key,
-        }
+#     user = models.OneToOneField(settings.AUTH_USER_MODEL, related_name='new_phone')
+#     phone = models.CharField(max_length=Phone.PHONE_MAX_LENGTH, unique=True)
+#     key = models.CharField(max_length=KEY_MAX_LENGTH)
 
-    @staticmethod
-    def generate_key():
-        return tools.generate_digit_key(NewPhone.KEY_MAX_LENGTH)
+#     objects = NewPhoneManager()
+
+#     def __unicode__(self):
+#         return "%(user)s's new phone is %(phone)s with key %(key)s" % {
+#             'user':self.user.get_full_name(), 
+#             'phone': self.phone,
+#             'key': self.key,
+#         }
+
+#     @staticmethod
+#     def generate_key():
+#         return tools.generate_digit_key(NewPhone.KEY_MAX_LENGTH)

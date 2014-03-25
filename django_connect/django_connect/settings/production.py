@@ -94,3 +94,19 @@ SECRET_KEY = get_env_setting('SECRET_KEY')
 ########## SITE CONFIGURATION
 SITE_URL = 'http://django-connect.herokuapp.com'
 ########## END SITE CONFIGURATION
+
+
+########## AWS S3 CONFIGURATION
+AWS_ACCESS_KEY_ID = get_env_setting('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = get_env_setting('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = 'django-connect'
+
+DEFAULT_FILE_STORAGE = '%s.s3utils.MediaS3BotoStorage' % SITE_NAME
+STATICFILES_STORAGE = '%s.s3utils.StaticS3BotoStorage' % SITE_NAME
+
+S3_URL = 'https://%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
+STATIC_DIRECTORY = '/static/'
+MEDIA_DIRECTORY = '/media/'
+STATIC_URL = S3_URL + STATIC_DIRECTORY
+MEDIA_URL = S3_URL + MEDIA_DIRECTORY
+########## END AWS S3 CONFIGURATION

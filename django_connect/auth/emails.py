@@ -7,9 +7,11 @@ from django_connect.decorators import async
 
 
 @async
-def verify_email(user):
+def welcome(user):
     message = _("""
     Dear %(short_name)s,
+
+    Welcome to Django Connect!
 
     Use the following link to verify your email:
     %(site_url)s%(page_url)s?key=%(key)s
@@ -23,9 +25,9 @@ def verify_email(user):
         'page_url': reverse('account:verify_email'),
     }
     send_mail(
-        _('Verify your email'),
+        _('Welcome to Django Connect'),
         message % context,
-        settings.EMAIL_HOST_USER,
+        'Django Connect',
         [user.new_email.email],
         fail_silently=False,
     )
